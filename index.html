@@ -47,25 +47,28 @@
 		</div>
 
 		<p>
-			Le regole di questo gioco sono relativamente semplici: innanzitutto è necessario creare una configurazione iniziale,
-			per farlo potete cliccare sulle caselle che formano la <strong>tavola di gioco</strong> per renderle cellula <strong>vive</strong> o <strong>morte</strong>.
+			Le regole di questo gioco sono relativamente semplici: innanzitutto è necessario creare una configurazione
+			iniziale, per farlo potete cliccare sulle caselle che formano la <strong>tavola di gioco</strong> per
+			renderle cellula <strong>vive</strong> o <strong>morte</strong>.
 
-			Una volta determinata la configurazione iniziale, cliccate su <i>Start</i> per avviare il gioco, regolando la velocità con il selettore.
+			Una volta determinata la configurazione iniziale, cliccate su <i>Start</i> per avviare il gioco, regolando
+			la velocità con il selettore.
 		</p>
 
 		<p>
-			<strong style="color: red;">ATTENZIONE!</strong> Selezionare velocità di aggiornamento superiori ai 10 update al secondo,
-			o dimensioni della griglia superiori al 50 x 50 potrebbe causare notevoli rallentamenti dovuti ad uso intensivo della CPU.
+			<strong style="color: red;">ATTENZIONE!</strong> Selezionare velocità di aggiornamento superiori ai 10 update al
+			secondo, o dimensioni della griglia superiori al 50 x 50 potrebbe causare notevoli rallentamenti dovuti ad
+			uso intensivo della CPU.
 		</p>
 
 		<div>
 			<strong>REGOLE DEL GIOCO:</strong><br />
 			Ad ogni iterazione, lo stato di una cellula cambia in base a queste regole:
 			<ul>
-				<li>Una cellula <strong>viva</strong> con una o meno cellule <strong>vive</strong> confinanti, <strong>muore</strong></li>
-				<li>Una cellula <strong>viva</strong> con più di tre cellule <strong>vive</strong> confinanti, <strong>muore</strong></li>
-				<li>Una cellula <strong>viva</strong> con due o tre cellule <strong>vive</strong> confinanti, resta <strong>viva</strong></li>
-				<li>Una cellula <strong>morta</strong> con esattamente tre cellule vive confinanti, diventa <strong>viva</strong></li>
+				<li>Una cellula <strong>viva</strong> con 1 o meno cellule <strong>vive</strong> confinanti, <strong>muore</strong></li>
+				<li>Una cellula <strong>viva</strong> con più di 3 cellule <strong>vive</strong> confinanti, <strong>muore</strong></li>
+				<li>Una cellula <strong>viva</strong> con 2 o 3 cellule <strong>vive</strong> confinanti, resta <strong>viva</strong></li>
+				<li>Una cellula <strong>morta</strong> con esattamente 3 cellule vive confinanti, diventa <strong>viva</strong></li>
 			</ul>
 		</div>
 
