@@ -2,29 +2,34 @@ h1 {
 	text-align: center;
 }
 
-#board {
-	margin: 0px auto;
-	border: 1px solid black;
-	clear: both;
-}
-
 #controls {
-	margin: 0px auto;
 	text-align: center;
 	clear: both;
-	margin-top: 10px;
+	margin: 10px auto 0;
+}
+
+#board {
+	margin: 0 auto;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+div.row {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
 }
 
 div.cell {
-	float: left;
-	margin: 0px;
-	border: 1px solid black;
+	border: 1px solid gray;
 }
 
-.cell.alive {
+div.cell.alive {
 	background-color: #0F0;
 }
 
-.cell.dead {
+div.cell.dead {
 	background-color: #CCC;
 }

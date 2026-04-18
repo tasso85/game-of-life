@@ -1,216 +1,239 @@
 (function($, undefined) {
-	var boardStatus = [];
-	var newStatus = [];
+	let boardStatus = [];
+	let boardSize = 10;
+	let cellSize  = 20;
+	let connectedBorders = false;
 
-	var BOARD_SIZE = 10;
-	var CELL_SIZE = 20;
+	let running = 0;
+	let refreshInterval = 1000;
+	let generation = 0;
 
-	var running = 0;
-	var refresh = 1000;
-	var generation = 0;
+	const STATUS_ALIVE = 1;
+	const STATUS_DEAD  = 0;
 
-	var cell = "<div class='cell dead'></div>";
+	const STATUS_RUNNING = 1;
+	const STATUS_STOPPED = 0;
+
+	const MAX_BOARD_SIZE = 150;
 
 	/**
-	 * Cambia lo stato della cellula
-	 * @param {object} cell
-	 * @param {int} newStatus
-	 * @access public
-	 * @return void
-	 **/
-	function toggleCell(cell, newStatus) {
-		if (newStatus == 1) {
-			cell.attr("class", "cell alive");
-		}
-		else {
-			cell.attr("class", "cell dead");
-		}
+	 * Seleziona una cella dalle sue coordinate.
+	 *
+	 * @param {int} x
+	 * @param {int} y
+	 * @returns {jQuery}
+	 */
+	function getCell(x, y) {
+		return $(`#cell_${x}_${y}`);
+	}
 
+	/**
+	 * Cambia lo stato della cellula.
+	 *
+	 * @param {jQuery} cell
+	 * @param {int} newStatus
+	 * @returns {int}
+	 */
+	function setCell(cell, newStatus) {
+		cell.toggleClass("alive", newStatus === STATUS_ALIVE)
+			.toggleClass("dead", newStatus === STATUS_DEAD)
+			.data("status", newStatus);
 		return newStatus;
 	}
 
 	/**
+	 * Verifica se la coordinata indicata rientra nella griglia e, se configurato come bordi connessi, la corregge
+	 * per rientrare nella griglia.
+	 *
+	 * @param {int} coord
+	 * @returns {int|null}
+	 */
+	function checkBoundary(coord) {
+		if (coord < 0 || coord >= boardSize) {
+			if (!connectedBorders) {
+				return null;
+			}
+
+			return (coord + boardSize) % boardSize;
+		}
+
+		return coord;
+	}
+
+	/**
 	 * Aggiorna lo stato di una cellula in base a quello delle cellule immediatamente adiacenti.
-	 * @param {object} cell
-	 * @access public
-	 * @return void
-	 **/
+	 *
+	 * @param {jQuery} cell
+	 * @returns {int}
+	 */
 	function updateCell(cell) {
-		var x = cell.attr("id").split("_");
-		var y = x[1] * 1;
-		x = x[0] * 1;
+		const data = cell.data();
 
-		var neighbor = 0;
-
-		for (var i = x - 1; i <= x + 1; i++) {
-			if (i < 0 || i >= BOARD_SIZE) {
+		let aliveNeighborCount = 0;
+		for (let x = data.x - 1; x <= data.x + 1; ++x) {
+			let boundX = checkBoundary(x);
+			if (boundX === null) {
 				continue;
 			}
 
-			for (var j = y - 1; j <= y + 1; j++) {
-				if (j < 0 || j >= BOARD_SIZE || (i == x && j == y)) {
+			for (let y = data.y - 1; y <= data.y + 1; ++y) {
+				if (x === data.x && y === data.y) {
 					continue;
 				}
 
-				neighbor += boardStatus[i][j];
+				let boundY = checkBoundary(y);
+				if (boundY === null) {
+					continue;
+				}
+
+				aliveNeighborCount += (boardStatus[boundX][boundY] === STATUS_ALIVE);
 			}
 		}
 
-		switch (neighbor) {
-			case 0:
-			case 1:
-			case 4:
-			case 5:
-			case 6:
-			case 7:
-			case 8:
-				newStatus[x][y] = toggleCell(cell, 0);
-				break;
-
+		switch (aliveNeighborCount) {
 			case 2:
-				newStatus[x][y] = toggleCell(cell, boardStatus[x][y]);
-				break;
+				return data.status;
 
 			case 3:
-				newStatus[x][y] = toggleCell(cell, 1);
-				break;
+				return setCell(cell, STATUS_ALIVE);
+
+			// tutte le altre possibilità: 0, 1, 4, 5, 6, 7, 8
+			default:
+				return setCell(cell, STATUS_DEAD);
 		}
 	}
 
 	/**
 	 * Aggiorna lo status del gioco della vita.
-	 * @access public
+	 *
 	 * @return void
-	 **/
+	 */
 	function updateBoard() {
 		if (running) {
-			newStatus = [];
-			for (var i = 0; i < BOARD_SIZE; i++) {
-				newStatus[i] = [];
-				for (var j = 0; j < BOARD_SIZE; j++) {
-					newStatus[i][j] = 0;
-					updateCell($("#" + i + "_" + j));
+			let newStatus = [];
+			for (let x = 0; x < boardSize; ++x) {
+				newStatus[x] = [];
+				for (let y = 0; y < boardSize; ++y) {
+					newStatus[x][y] = updateCell(getCell(x, y));
 				}
 			}
 
 			$("#generation").text(++generation);
-			boardStatus = newStatus.slice(0);
+			boardStatus = newStatus;
 		}
 	}
 
 	/**
-	 * Inizializza il gioco
-	 * @access public
+	 * Inizializza il gioco.
+	 *
 	 * @return void
-	 **/
+	 */
 	function initBoard() {
-		var board = $("#board").html("").css({
-			"width" : (BOARD_SIZE * (CELL_SIZE + 2))+"px",
-			"height" : (BOARD_SIZE * (CELL_SIZE + 2))+"px"
+		let board = $("#board").empty().css({
+			"width"  : (boardSize * (cellSize + 2)) + "px",
+			"height" : (boardSize * (cellSize + 2)) + "px"
 		});
 
 		boardStatus = [];
-		for (var x = 0; x < BOARD_SIZE; x++) {
+		for (let x = 0; x < boardSize; x++) {
 			boardStatus[x] = [];
-			for (var y = 0; y < BOARD_SIZE; y++) {
-				boardStatus[x][y] = 0;
-				board.append($(cell).attr("id", x + "_" + y));
+			let row = $(`<div class="row"></div>`);
+
+			for (let y = 0; y < boardSize; y++) {
+				row.append(
+					$(`<div class="cell dead"></div>`)
+						.attr("id", `cell_${x}_${y}`)
+						.data({x, y, status: boardStatus[x][y] = STATUS_DEAD})
+				);
 			}
+
+			board.append(row);
 		}
 
-		$(".cell").css({
-			"width" : CELL_SIZE + "px",
-			"height" : CELL_SIZE + "px"
-		});
-
 		$("#generation").text(generation = 0);
+		$("div.cell").css({
+			"width"  : cellSize + "px",
+			"height" : cellSize + "px"
+		});
 	}
 
 	/**
-	 * Ressetta il gioco
-	 * @access public
+	 * Ressetta il gioco.
+	 *
 	 * @return void
-	 **/
+	 */
 	function resetBoard() {
 		if (running) {
-			$("#startStop").click();
+			toggleGame(STATUS_STOPPED);
 		}
 
-		boardStatus = [];
-		for (var i = 0; i < BOARD_SIZE; i++) {
-			boardStatus[i] = [];
-			for (var j = 0; j < BOARD_SIZE; j++) {
-				boardStatus[i][j] = toggleCell($("#" + i + "_" + j), 0);
-			}
+		initBoard();
+	}
+
+	/**
+	 * Aggiorna lo stato del gioco.
+	 *
+	 * @param {int} newStatus
+	 */
+	function toggleGame(newStatus) {
+		$("#speed, #size, #linked").prop("disabled", newStatus);
+
+		let newText;
+		if (newStatus) {
+			running = setInterval(updateBoard, refreshInterval);
+			newText = "STOP";
+		}
+		else {
+			clearInterval(running);
+			running = 0;
+			newText = "START";
 		}
 
-		$("#generation").text(generation = 0);
+		$("#toggle").text(newText);
 	}
 
 	$(function() {
-		$("#speed").change(function() {
-			refresh = $(this).val() * 1;
-		}).val(refresh);
+		$("#speed").on("change", function() {
+			refreshInterval = parseInt($(this).val());
+		}).val(refreshInterval);
 
-		var options = "";
-		for (var i = 5; i <= 100; i += 5) {
-			options += "<option value='" + i + "'>" + i + " x " + i + "</option>";
+		$("#linked").on("change", function() {
+			connectedBorders = $(this).val() === "1";
+		});
+
+		let options = [];
+		for (let i = 5; i <= MAX_BOARD_SIZE; i += 5) {
+			options.push(`<option value="${i}">${i} x ${i}</option>`);
 		}
 
-		$("#size").html("").change(function() {
-			BOARD_SIZE = $(this).val() * 1;
+		$("#size").empty().on("change", function() {
+			boardSize = parseInt($(this).val());
 
-			switch (BOARD_SIZE) {
-				case 5:
-				case 10:
-				case 15:
-				case 20:
-				case 25:
-					CELL_SIZE = 20;
-					break;
-
-				case 30:
-				case 35:
-				case 40:
-				case 45:
-				case 50:
-					CELL_SIZE = 15;
-					break;
-
-				default:
-					CELL_SIZE = 10;
-					break;
+			if (boardSize <= 25) {
+				cellSize = 20;
+			}
+			else if (boardSize <= 50) {
+				cellSize = 15;
+			}
+			else if (boardSize <= 100) {
+				cellSize = 10;
+			}
+			else {
+				cellSize = 5;
 			}
 
 			initBoard();
-		}).append(options).val(BOARD_SIZE);
+		}).append(options.join("")).val(boardSize);
 
-		var startStop = $("#startStop");
+		$("#reset").on("click", resetBoard);
+		$("#toggle").on("click", function () {
+			toggleGame(running ? STATUS_STOPPED : STATUS_RUNNING);
+		});
 
-		function start() {
-			$("#speed, #size").attr("disabled", "disabled");
-			running = setInterval(updateBoard, refresh);
-			$(this).text("STOP !").click(stop);
-		}
-
-		function stop() {
-			$("#speed, #size").removeAttr("disabled");
-			clearInterval(running);
-			running = 0;
-			$(this).text("START !").click(start);
-		}
-
-		startStop.click(start);
-		$("#reset").click(resetBoard);
-
-		$(document).on("click", ".cell", function() {
+		$(document).on("click", "div.cell", function() {
 			if (!running) {
-				var t = $(this);
-				var x = t.attr("id").split("_");
-				var y = x[1] * 1;
-				x = x[0] * 1;
-
-				boardStatus[x][y] = toggleCell(t, Math.abs(boardStatus[x][y]-1));
+				const cell = $(this), data = cell.data();
+				boardStatus[data.x][data.y] = setCell(cell, data.status === STATUS_ALIVE ? STATUS_DEAD : STATUS_ALIVE);
 			}
 
 			return false;

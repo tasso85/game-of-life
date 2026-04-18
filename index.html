@@ -15,35 +15,47 @@
 			il cui algoritmo è stato inizialmente pubblicato da matematico John Conway nel 1970.
 
 			Per ulteriori informazioni, nonchè per diversi esempi di configurazioni iniziali, vi rimando alla pagina su
-			<a href="http://it.wikipedia.org/wiki/Game_of_Life" target="_blank">Wikipedia</a>.
+			<a href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life" target="_blank">Wikipedia</a>.
 		</p>
 
 		<div id="board"></div>
 
 		<div id="controls">
-			Velocità di evoluzione:
-			<select id="speed">
-				<option value="1000">1 update/s</option>
-				<option value="200">5 update/s</option>
-				<option value="100">10 update/s</option>
-				<option value="20">50 update/s</option>
-				<option value="5">100 update/s</option>
-			</select>
-			&nbsp;&nbsp;&nbsp;
-			Dimensioni Griglia:
-			<select id="size">
-				<option value="10">10 x 10</option>
-				<option value="20">20 x 20</option>
-				<option value="30">30 x 30</option>
-				<option value="40">40 x 40</option>
-				<option value="50">50 x 50</option>
-			</select>
-			<br /><br />
-			<button type="button" id="startStop">START !</button>
-			&nbsp;&nbsp;&nbsp;
+			<label>
+				Velocità di evoluzione:
+				<select id="speed">
+					<option value="1000">1 update/s</option>
+					<option value="200">5 update/s</option>
+					<option value="100">10 update/s</option>
+					<option value="40">25 update/s</option>
+					<option value="20">50 update/s</option>
+					<option value="10">100 update/s</option>
+					<option value="5">200 update/s</option>
+					<option value="2">500 update/s</option>
+					<option value="1">1000 update/s</option>
+				</select>
+			</label>
+			&nbsp; &nbsp; &nbsp;
+			<label>
+				Dimensioni della griglia:
+				<select id="size">
+					<!-- generato dinamicamente -->
+				</select>
+			</label>
+			&nbsp; &nbsp; &nbsp;
+			<label>
+				Bordi connessi:
+				<select id="linked">
+					<option value="0">No</option>
+					<option value="1">Sì</option>
+				</select>
+			</label>
+			<br/><br/>
+			<button type="button" id="toggle">START</button>
+			&nbsp; &nbsp; &nbsp;
 			Generazione attuale: <strong id="generation"></strong>
-			&nbsp;&nbsp;&nbsp;
-			<button type="button" id="reset">RESET !</button>
+			&nbsp; &nbsp; &nbsp;
+			<button type="button" id="reset">RESET</button>
 		</div>
 
 		<p>
